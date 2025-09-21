@@ -81,7 +81,7 @@ export default function DashboardPage() {
                 </svg>
                 Профиль
               </a>
-              <a href="/orders" className={`flex items-center h-16 ${window.location.pathname === '/orders' ? 'text-blue-600 font-medium border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
+              <a href="/orders" className="flex items-center h-16 text-gray-500 hover:text-gray-700">
                 <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
