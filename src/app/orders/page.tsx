@@ -24,8 +24,8 @@ export default function OrdersPage() {
 	const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
 	return (
-		<div className="min-h-screen bg-[#f4f6f8]">
-			<Header />
+			<div className="min-h-screen bg-[#f4f6f8]">
+				<Header />
 			<div className="max-w-[1600px] mx-auto px-8 py-10">
 				<h1 className="text-[56px] font-bold mb-10 mt-2 text-black">Заказы</h1>
 				<div className="grid grid-cols-4 gap-x-8 gap-y-8">
