@@ -25,13 +25,13 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gray-50">
     <Header />
     <main className="max-w-6xl ml-0 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#f5f7f9] rounded-lg shadow-none p-10">
+        <div className="bg-[#f5f7f9] rounded-lg shadow-none p-6 md:p-10">
           <div className="flex items-center mb-8">
             <div className="w-1.5 h-10 bg-blue-600 rounded mr-4"></div>
-            <h1 className="text-5xl font-bold text-gray-900">Профиль</h1>
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900">Профиль</h1>
           </div>
 
-          <div className="flex flex-row items-start gap-12">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
             {/* Аватар сол жақта, үлкейтілген */}
             <div className="flex flex-col items-center justify-start w-[260px]">
               <div className="w-[200px] h-[200px] border-4 border-blue-500 rounded-full flex items-center justify-center bg-gray-100 mb-2">

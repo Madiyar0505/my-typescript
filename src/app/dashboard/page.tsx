@@ -62,25 +62,29 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-white w-full">
       <Header />
       <div className="w-full bg-white">
-        <main className="p-8">
+        <main className="p-4 sm:p-8">
           {/* Приветствие */}
-          <div className="mb-10">
-            <h1 className="text-4xl font-bold text-gray-900">
+          <div className="mb-6 sm:mb-10">
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
               Привет, Алим  Джолдаспаев 👋
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-12">
             {/* Блок заказов - больший */}
-            <div id="orders" className="bg-white lg:col-span-2 scroll-mt-20 rounded-2xl shadow-lg border border-gray-200 px-6 py-6">
-              <div className="flex items-center mb-6">
+            <div id="orders" className="bg-white lg:col-span-2 scroll-mt-20 rounded-2xl shadow-lg border border-gray-200 px-3 py-4 sm:px-6 sm:py-6">
+              <div className="flex items-center mb-4 sm:mb-6">
                 <div className="w-1 h-6 bg-blue-600 mr-4"></div>
-                <h2 className="text-2xl font-bold text-gray-900">Заказы</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Заказы</h2>
               </div>
               <Swiper
                 modules={[Navigation, Pagination]}
-                spaceBetween={24}
-                slidesPerView={4}
+                spaceBetween={12}
+                slidesPerView={1}
+                breakpoints={{
+                  640: { slidesPerView: 2, spaceBetween: 16 },
+                  1024: { slidesPerView: 4, spaceBetween: 24 }
+                }}
                 navigation
                 pagination={{ clickable: true }}
                 className="pb-10"
@@ -88,8 +92,8 @@ export default function DashboardPage() {
               >
                 {mockOrders.map((order) => (
                   <SwiperSlide key={order.id}>
-                    <div className="bg-white border border-gray-200 rounded-xl p-4 h-full shadow-sm flex flex-col min-h-[370px]">
-                      <div className="w-full h-48 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 sm:p-4 h-full shadow-sm flex flex-col min-h-[270px] sm:min-h-[370px]">
+                      <div className="w-full h-32 sm:h-48 bg-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
                         {/* Фото орны: әр карточкаға жеке сурет қойыңыз */}
                         <img
                           src={order.imageUrl}
@@ -110,7 +114,7 @@ export default function DashboardPage() {
                         <p className="text-2xl font-bold text-gray-900 mb-0">{order.amount}</p>
                         <p className="text-gray-500 text-sm">{order.date}</p>
                       </div>
-                      <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-700 flex items-center justify-center space-x-2 transition-colors mt-auto">
+                      <button className="w-full bg-blue-600 text-white px-2 py-2 rounded-lg text-base font-medium hover:bg-blue-700 flex items-center justify-center space-x-2 transition-colors mt-auto">
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
@@ -143,16 +147,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Блок профиля - меньший */}
-            <div id="profile" className="bg-white lg:col-span-1 scroll-mt-20 rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="flex items-center mb-6">
+            <div id="profile" className="bg-white lg:col-span-1 scroll-mt-20 rounded-2xl shadow-lg border border-gray-200 p-3 sm:p-6">
+              <div className="flex items-center mb-4 sm:mb-6">
                 <div className="w-1 h-6 bg-blue-600 mr-4"></div>
-                <h2 className="text-xl font-bold text-gray-900">Профиль</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Профиль</h2>
               </div>
               
               <div className="flex items-start space-x-4">
                 {/* Аватар */}
-                <div className="w-16 h-16 border-2 border-blue-600 rounded-full flex items-center justify-center bg-white">
-                  <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-blue-600 rounded-full flex items-center justify-center bg-white">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -212,17 +216,17 @@ export default function DashboardPage() {
           </div>
 
           {/* Нижние блоки - Трансляция и Платежи */}
-          <div className="mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 w-full items-stretch">
+          <div className="mt-6 sm:mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-12 w-full items-stretch">
               {/* Блок трансляции - lg:col-span-2 */}
-                <div id="broadcast" className="bg-white p-8 rounded-lg border border-gray-200 w-full scroll-mt-20 shadow-lg lg:col-span-2">
-                <div className="flex items-center justify-between mb-6">
+                <div id="broadcast" className="bg-white p-4 sm:p-8 rounded-lg border border-gray-200 w-full scroll-mt-20 shadow-lg lg:col-span-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
                   <div className="flex items-center">
                     <div className="w-1 h-8 bg-blue-600 mr-4"></div>
-                    <h2 className="text-2xl font-bold text-gray-900">Трансляция</h2>
+                    <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Трансляция</h2>
                   </div>
                   {/* Кнопка Live */}
-                  <div className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center">
+                  <div className="bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium flex items-center">
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                     </svg>
@@ -231,7 +235,7 @@ export default function DashboardPage() {
                 </div>
                 
                 <div className="relative w-full flex justify-center items-center">
-                  <div className="w-full aspect-video min-h-[320px] min-w-[320px] bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                  <div className="w-full aspect-video min-h-[180px] sm:min-h-[320px] min-w-[180px] sm:min-w-[320px] bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                     <img 
                       src="/Frame 2095585319.png" 
                       alt="Мастерская по ремонту автомобилей"
@@ -242,7 +246,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Блок платежей - lg:col-span-3 */}
-                <div className="bg-white p-8 rounded-lg border border-gray-200 w-full flex flex-col lg:col-span-3 shadow-lg">
+                <div className="bg-white p-4 sm:p-8 rounded-lg border border-gray-200 w-full flex flex-col lg:col-span-3 shadow-lg">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
                     <div className="w-1 h-8 bg-blue-600 mr-4"></div>

@@ -26,13 +26,13 @@ export default function OrdersPage() {
 	return (
 			<div className="min-h-screen bg-[#f4f6f8]">
 				<Header />
-			<div className="max-w-[1600px] mx-auto px-8 py-10">
-				<h1 className="text-[56px] font-bold mb-10 mt-2 text-black">Заказы</h1>
-				<div className="grid grid-cols-4 gap-x-8 gap-y-8">
+			<div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6 sm:py-10">
+				<h1 className="text-3xl sm:text-[56px] font-bold mb-6 sm:mb-10 mt-2 text-black">Заказы</h1>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
 					{orders.map((order) => (
 						<div
 							key={order.id}
-							className="bg-white rounded-[8px] border border-[#e5e7eb] p-7 cursor-pointer transition hover:shadow-md min-h-[210px] flex flex-col justify-between"
+							className="bg-white rounded-[8px] border border-[#e5e7eb] p-6 sm:p-7 cursor-pointer transition hover:shadow-md min-h-[210px] flex flex-col justify-between"
 							onClick={() => setSelectedOrder(order)}
 						>
 							<div>
@@ -40,7 +40,7 @@ export default function OrdersPage() {
 									<span className="h-2 w-2 rounded-full bg-blue-500 inline-block"></span>
 									<span className="text-[#222] text-[16px] font-normal">Статус</span>
 								</div>
-								<div className="text-[28px] font-semibold mb-1 text-black">{order.details}</div>
+								<div className="text-2xl sm:text-[28px] font-semibold mb-1 text-black">{order.details}</div>
 								<div className="text-[#6b7280] text-[16px] mb-6">Дата заказа</div>
 							</div>
 							<button
