@@ -1,3 +1,5 @@
+  // Add missing isPaid function
+  const isPaid = (stageId: string) => stageId === 'WON';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -95,10 +97,6 @@ export default function PaymentsPage() {
 
   const canPay = (stageId: string) => {
     return !['WON', 'LOSE'].includes(stageId);
-  };
-
-  const isPaid = (stageId: string) => {
-    return stageId === 'WON';
   };
 
   const formatDate = (dateString: string) => {
@@ -293,44 +291,6 @@ export default function PaymentsPage() {
           
           {sortedDeals.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">Сделки не найдены</p>
-            </div>
-          )}
-        </div>
-
-        {/* Мобильная версия списка сделок */}
-        <div className="md:hidden space-y-4">
-          {sortedDeals.map((deal) => (
-            <div key={deal.ID} className="bg-white rounded-lg shadow p-4 border border-gray-200">
-              <div className="flex justify-between items-start mb-3">
-                <div className="font-medium text-gray-900">Счет #{deal.ID}</div>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(deal.STAGE_ID)}`}>
-                  {getStatusText(deal.STAGE_ID)}
-                </span>
-              </div>
-              <p className="text-sm text-gray-800 mb-3">{deal.TITLE}</p>
-              <div className="text-sm text-gray-500 mb-1">Дата: {formatDate(deal.DATE_CREATE)}</div>
-              <div className="text-sm font-medium text-gray-900 mb-4">
-                Сумма: {formatAmount(deal.OPPORTUNITY, deal.CURRENCY_ID)}
-              </div>
-              
-              {canPay(deal.STAGE_ID) ? (
-                <button
-                  onClick={() => handlePayment(deal.ID)}
-                  className="w-full text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-2 rounded-md transition-colors text-sm font-medium"
-                >
-                  Оплатить
-                </button>
-              ) : deal.STAGE_ID === 'WON' ? (
-                <div className="w-full text-center text-green-600 bg-green-100 px-3 py-2 rounded-md text-sm font-medium">
-                  Оплачено
-                </div>
-              ) : null}
-            </div>
-          ))}
-
-          {sortedDeals.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
               <p className="text-gray-500">Сделки не найдены</p>
             </div>
           )}

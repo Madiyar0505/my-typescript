@@ -246,82 +246,79 @@ export default function DashboardPage() {
               </div>
 
               {/* Блок платежей - lg:col-span-3 */}
-                <div className="bg-white p-4 sm:p-8 rounded-lg border border-gray-200 w-full flex flex-col lg:col-span-3 shadow-lg">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <div className="w-1 h-8 bg-blue-600 mr-4"></div>
-                    <h2 className="text-2xl font-bold text-gray-900">Платежи</h2>
+                <div className="bg-white p-2 sm:p-8 rounded-lg border border-gray-200 w-full flex flex-col lg:col-span-3 shadow-lg">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <div className="flex items-center">
+                      <div className="w-1 h-8 bg-blue-600 mr-2 sm:mr-4"></div>
+                      <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Платежи</h2>
+                    </div>
+                    <select className="text-xs sm:text-sm border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 bg-white">
+                      <option>Все платежи за последнюю неделю</option>
+                    </select>
                   </div>
-                  <select className="text-sm border border-gray-300 rounded px-4 py-2 bg-white">
-                    <option>Все платежи за последнюю неделю</option>
-                  </select>
-                </div>
-                
-                {/* Заголовки таблицы */}
-                <div className="grid grid-cols-4 gap-6 mb-4 text-sm font-medium text-gray-500 border-b pb-3">
-                  <div className="flex items-center">
-                    Employee
-                    <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>Статус</div>
-                  <div>Выполнено</div>
-                  <div>Действие</div>
-                </div>
-                
-                {/* Строки платежей */}
-                <div className="space-y-6 overflow-y-auto">
-                  {mockPayments.map((payment, index) => (
-                    <div key={index} className="grid grid-cols-4 gap-6 items-center py-3">
-                      {/* Employee */}
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  {/* Mobile: horizontal scroll, compact table */}
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[480px] sm:min-w-0">
+                      <div className="grid grid-cols-4 gap-2 sm:gap-6 mb-2 sm:mb-4 text-xs sm:text-sm font-medium text-gray-500 border-b pb-2 sm:pb-3">
+                        <div className="flex items-center">Employee
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{payment.employee}</div>
-                          <div className="text-sm text-gray-500">{payment.name}</div>
-                        </div>
+                        <div>Статус</div>
+                        <div>Выполнено</div>
+                        <div>Действие</div>
                       </div>
-                      
-                      {/* Статус */}
-                      <div>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          payment.status === 'Оплачено' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${
-                            payment.status === 'Оплачено' ? 'bg-green-500' : 'bg-red-500'
-                          }`}></div>
-                          {payment.status}
-                        </span>
-                      </div>
-                      
-                      {/* Выполнено */}
-                      <div className="flex items-center space-x-3">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${payment.completed}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-500">{payment.completed}%</span>
-                      </div>
-                      
-                      {/* Действие */}
-                      <div>
-                        <button className="text-blue-600 text-sm hover:text-blue-800 font-medium">
-                          {payment.action}
-                        </button>
+                      <div className="space-y-2 sm:space-y-6">
+                        {mockPayments.map((payment, index) => (
+                          <div key={index} className="grid grid-cols-4 gap-2 sm:gap-6 items-center py-2 sm:py-3">
+                            {/* Employee */}
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div>
+                                <div className="text-xs sm:text-sm font-medium text-gray-900">{payment.employee}</div>
+                                <div className="text-xs sm:text-sm text-gray-500">{payment.name}</div>
+                              </div>
+                            </div>
+                            {/* Статус */}
+                            <div>
+                              <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                                payment.status === 'Оплачено' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                <div className={`w-2 h-2 rounded-full mr-1 sm:mr-2 ${
+                                  payment.status === 'Оплачено' ? 'bg-green-500' : 'bg-red-500'
+                                }`}></div>
+                                {payment.status}
+                              </span>
+                            </div>
+                            {/* Выполнено */}
+                            <div className="flex items-center space-x-1 sm:space-x-3">
+                              <div className="w-14 sm:w-20 bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-green-500 h-2 rounded-full" 
+                                  style={{ width: `${payment.completed}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs sm:text-sm text-gray-500">{payment.completed}%</span>
+                            </div>
+                            {/* Действие */}
+                            <div>
+                              <button className="text-blue-600 text-xs sm:text-sm hover:text-blue-800 font-medium">
+                                {payment.action}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div> 
-              </div>
+                  </div>
+                </div>
             </div>
           </div>
 

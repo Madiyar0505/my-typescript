@@ -194,12 +194,12 @@ export default function RegisterPage() {
 
           {/* Правая часть - изображение */}
         {/* Оң жақ: фото 40% */}
-        <div className="hidden md:flex w-[40%] h-full items-center justify-center bg-gray-100 p-6">
-          <div className="relative w-full h-full flex items-center justify-center">
+        <div className="hidden md:flex w-[40%] h-full">
+          <div className="relative w-full h-full">
             <img
               src="/Frame 2095585499.png"
               alt="Hyundai Santa Fe"
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 // Fallback если изображение не загрузилось
                 e.currentTarget.style.display = 'none';
@@ -209,7 +209,7 @@ export default function RegisterPage() {
                 }
               }}
             />
-            <div className="w-full h-full bg-gray-300 rounded-xl flex items-center justify-center absolute inset-0" style={{display: 'none'}}>
+            <div className="w-full h-full bg-gray-300 flex items-center justify-center absolute inset-0" style={{display: 'none'}}>
               <span className="text-gray-500 text-lg">Изображение автомобиля</span>
             </div>
           </div>
