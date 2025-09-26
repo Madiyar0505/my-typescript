@@ -1,10 +1,18 @@
-  // Add missing isPaid function
-  const isPaid = (stageId: string) => stageId === 'WON';
+'// Платежи беті Bitrix24-тің "Сделки" (deals) арқылы жұмыс істейді.\n'
+'// 1. Бұл бет /api/deals API-іне сұраныс жібереді.\n'
+'// 2. /api/deals Bitrix24 API-інен барлық мәмілелерді (deals) алады.\n'
+'// 3. Әр мәміле — бұл төлем жолы (номер счета, дата, сумма, статус, действие).\n'
+'// 4. "Оплатить" басқанда /api/deals/[id]/pay Bitrix24-те статусын "Оплачено" (WON) деп жаңартады.\n'
+'// Яғни, барлық төлемдер мен төлемді растау Bitrix24 API арқылы орындалады.\n'
 'use client';
+
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { BitrixDeal } from '@/lib/bitrix';
+import dynamic from 'next/dynamic';
+
+const MuiFilter = dynamic(() => import('@/components/MuiFilter'), { ssr: false });
 
 export default function PaymentsPage() {
   const [deals, setDeals] = useState<BitrixDeal[]>([]);
@@ -14,6 +22,7 @@ export default function PaymentsPage() {
     status: 'all',
     sortBy: 'date'
   });
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchDeals();
@@ -39,18 +48,18 @@ export default function PaymentsPage() {
       const response = await fetch(`/api/deals/${dealId}/pay`, {
         method: 'POST',
       });
-      
       const data = await response.json();
-      
       if (data.success) {
-        // Обновляем список сделок
+        setStatusMessage({ type: 'success', text: 'Оплата прошла успешно!' });
         fetchDeals();
       } else {
-        alert('Ошибка обработки платежа');
+        setStatusMessage({ type: 'error', text: data.message || 'Ошибка обработки платежа' });
       }
     } catch (error) {
+      setStatusMessage({ type: 'error', text: 'Ошибка обработки платежа' });
       console.error('Error processing payment:', error);
-      alert('Ошибка обработки платежа');
+    } finally {
+      setTimeout(() => setStatusMessage(null), 3000);
     }
   };
 
@@ -67,7 +76,7 @@ export default function PaymentsPage() {
       case 'FINAL_INVOICE':
         return 'Счет выставлен';
       case 'WON':
-        return 'Оплачена';
+        return 'Оплачено';
       case 'LOSE':
         return 'Отменена';
       default:
@@ -75,212 +84,110 @@ export default function PaymentsPage() {
     }
   };
 
-  const getStatusColor = (stageId: string) => {
-    switch (stageId) {
-      case 'NEW':
-        return 'bg-blue-100 text-blue-800';
-      case 'PREPARATION':
-      case 'EXECUTING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'PREPAYMENT_INVOICE':
-        return 'bg-red-100 text-red-800';
-      case 'FINAL_INVOICE':
-        return 'bg-purple-100 text-purple-800';
-      case 'WON':
-        return 'bg-green-100 text-green-800';
-      case 'LOSE':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // ...existing code for filteredDeals, sortedDeals, etc.
 
-  const canPay = (stageId: string) => {
-    return !['WON', 'LOSE'].includes(stageId);
-  };
+  // Place the return statement for the component here (not inside getStatusText)
+// ...existing code...
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatAmount = (amount: string, currency: string) => {
-    const numAmount = parseFloat(amount);
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: currency === 'RUB' ? 'RUB' : 'USD',
-      minimumFractionDigits: 0
-    }).format(numAmount);
-  };
-
-  const filteredDeals = deals.filter(deal => {
-    const matchesSearch = deal.TITLE.toLowerCase().includes(filter.search.toLowerCase()) ||
-                         deal.ID.includes(filter.search);
-    
-    const matchesStatus = filter.status === 'all' || 
-                         (filter.status === 'paid' && isPaid(deal.STAGE_ID)) ||
-                         (filter.status === 'unpaid' && !isPaid(deal.STAGE_ID));
-    
-    return matchesSearch && matchesStatus;
+  // Filtering and sorting logic
+  const filteredDeals = deals.filter((deal) => {
+    const searchMatch =
+      deal.ID.toString().includes(filter.search) ||
+      deal.TITLE.toLowerCase().includes(filter.search.toLowerCase());
+    const statusMatch = filter.status === 'all' || deal.STAGE_ID === filter.status;
+    return searchMatch && statusMatch;
   });
 
   const sortedDeals = [...filteredDeals].sort((a, b) => {
-    switch (filter.sortBy) {
-      case 'date':
-        return new Date(b.DATE_CREATE).getTime() - new Date(a.DATE_CREATE).getTime();
-      case 'amount':
-        return parseFloat(b.OPPORTUNITY) - parseFloat(a.OPPORTUNITY);
-      case 'status':
-        return a.STAGE_ID.localeCompare(b.STAGE_ID);
-      default:
-        return 0;
+    if (filter.sortBy === 'date') {
+      return new Date(b.DATE_CREATE).getTime() - new Date(a.DATE_CREATE).getTime();
+    } else if (filter.sortBy === 'amount') {
+      return Number(b.OPPORTUNITY) - Number(a.OPPORTUNITY);
+    } else if (filter.sortBy === 'status') {
+      return a.STAGE_ID.localeCompare(b.STAGE_ID);
     }
+    return 0;
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Загрузка платежей...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Helper functions
+  function formatDate(dateStr: string) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ru-RU');
+  }
+
+  function formatAmount(amount: string | number, _currency: string) {
+    // Always show KZT
+    return `${Number(amount).toLocaleString('ru-RU')} ₸`;
+  }
+
+  function getStatusColor(stageId: string) {
+    switch (stageId) {
+      case 'WON':
+        return 'bg-green-100 text-green-800';
+      case 'LOSE':
+        return 'bg-red-100 text-red-800';
+      case 'PREPAYMENT_INVOICE':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function canPay(stageId: string) {
+    return stageId !== 'WON' && stageId !== 'LOSE';
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-  <Header />
-      
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Платежи</h1>
-          <p className="text-gray-600">Управление сделками и платежами</p>
+      <Header />
+      <main className="max-w-7xl mx-auto py-0 px-0">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-black mt-0 mb-8">Платежи</h1>
         </div>
 
-        {/* Фильтры */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Поиск
-              </label>
-              <input
-                type="text"
-                value={filter.search}
-                onChange={(e) => setFilter(prev => ({ ...prev, search: e.target.value }))}
-                placeholder="Номер счета или название"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Статус
-              </label>
-              <select
-                value={filter.status}
-                onChange={(e) => setFilter(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Все</option>
-                <option value="paid">Оплачены</option>
-                <option value="unpaid">Не оплачены</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Сортировка
-              </label>
-              <select
-                value={filter.sortBy}
-                onChange={(e) => setFilter(prev => ({ ...prev, sortBy: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="date">По дате</option>
-                <option value="amount">По сумме</option>
-                <option value="status">По статусу</option>
-              </select>
-            </div>
-            
-            <div className="flex items-end">
-              <button
-                onClick={fetchDeals}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Обновить
-              </button>
-            </div>
+        {/* Хабарлама */}
+        {statusMessage && (
+          <div
+            className={`mb-4 px-4 py-3 rounded text-center font-medium ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+          >
+            {statusMessage.text}
           </div>
-        </div>
+        )}
 
         {/* Список сделок */}
-        <div className="bg-white rounded-lg shadow overflow-hidden hidden md:block">
+        <div className="bg-gray-50 overflow-hidden hidden md:block">
           <div className="overflow-x-auto ">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full">
+              <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Номер счета
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Название
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Дата
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Сумма
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Статус
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Действия
-                  </th>
+                  <th className="px-6 py-3 text-left text-base font-medium text-blue-600">Номер счета</th>
+                  <th className="px-6 py-3 text-left text-base font-medium text-blue-600">Дата</th>
+                  <th className="px-6 py-3 text-left text-base font-medium text-blue-600">Сумма</th>
+                  <th className="px-6 py-3 text-left text-base font-medium text-blue-600">Статус</th>
+                  <th className="px-6 py-3 text-left text-base font-medium text-blue-600">Действие</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white">
                 {sortedDeals.map((deal) => (
-                  <tr key={deal.ID} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{deal.ID}
+                  <tr key={deal.ID} className="border-b border-gray-100">
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{deal.ID}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatDate(deal.DATE_CREATE)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatAmount(deal.OPPORTUNITY, deal.CURRENCY_ID)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal">
+                      {deal.STAGE_ID === 'WON' ? (
+                        <span className="text-blue-400">Оплачено</span>
+                      ) : (
+                        <span className="text-gray-500">Не оплачено</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {deal.TITLE}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(deal.DATE_CREATE)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatAmount(deal.OPPORTUNITY, deal.CURRENCY_ID)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(deal.STAGE_ID)}`}>
-                        {getStatusText(deal.STAGE_ID)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {canPay(deal.STAGE_ID) ? (
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal">
+                      {deal.STAGE_ID !== 'WON' ? (
                         <button
                           onClick={() => handlePayment(deal.ID)}
-                          className="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md transition-colors"
+                          className="bg-black text-white px-5 py-1.5 rounded transition-colors hover:bg-gray-800"
                         >
                           Оплатить
                         </button>
-                      ) : deal.STAGE_ID === 'WON' ? (
-                        <span className="text-green-600">Оплачено</span>
                       ) : null}
                     </td>
                   </tr>
@@ -288,7 +195,7 @@ export default function PaymentsPage() {
               </tbody>
             </table>
           </div>
-          
+
           {sortedDeals.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">Сделки не найдены</p>

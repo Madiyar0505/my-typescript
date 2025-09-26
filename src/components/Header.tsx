@@ -1,8 +1,10 @@
 'use client';
 
 // removed unused useState import
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import styles from './Header.module.scss';
 
 export default function Header() {
   const pathname = usePathname();
@@ -15,41 +17,22 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 h-16 flex items-center px-2 sm:px-6">
-      {/* Desktop: nav right-aligned, spaced out; Mobile: horizontal scroll */}
-      <nav className="w-full">
-        <div className="hidden sm:flex items-center justify-end space-x-12 w-full">
-          {navigation.map((item) => {
-            const isActive = item.href.startsWith('/profile') ? pathname.startsWith('/profile') : pathname === item.href;
-            return (
-              <Link key={item.name} href={item.href}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors text-base ${isActive ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
-              >
-                {item.icon}
-                {item.name}
-              </Link>
-            );
-          })}
-        </div>
-        <div className="flex sm:hidden items-center space-x-2 w-full overflow-x-auto no-scrollbar">
-          {navigation.map((item) => {
-            const isActive = item.href.startsWith('/profile') ? pathname.startsWith('/profile') : pathname === item.href;
-            return (
-              <Link key={item.name} href={item.href}
-                className={`flex items-center px-2 py-2 rounded-lg transition-colors whitespace-nowrap text-sm ${isActive ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
-              >
-                {item.icon}
-                {item.name}
-              </Link>
-            );
-          })}
-        </div>
+    <header className={styles.header}>
+      <nav className={styles.nav}>
+        {navigation.map((item) => {
+          const isActive = item.href.startsWith('/profile') ? pathname.startsWith('/profile') : pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={isActive ? `${styles.link} ${styles.linkActive}` : styles.link}
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
-      {/* Hide scrollbar for mobile nav */}
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </header>
   );
 }

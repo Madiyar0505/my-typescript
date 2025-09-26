@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import Header from '@/components/Header';
+import { BitrixDeal } from '@/lib/bitrix';
+import { User } from '@/lib/database';
 
 // Моковые данные для заказов
 const mockOrders = [
@@ -16,47 +18,102 @@ const mockOrders = [
   { id: 4, title: 'Счета на оплату для Юр. Лиц', status: '', amount: '', date: '', button: 'Скачать', imageUrl: '/image.png' },
 ];
 
-// Моковые данные для профиля
-const mockProfile = {
-  name: '',
-  email: '',
-  phone: '',
-  address: ''
-};
-
-// Моковые данные для платежей
-const mockPayments = [
-  { 
-    employee: 'Имя', 
-    name: 'Почта@jourrapide.com', 
-    status: 'Не оплачено', 
-    completed: 96, 
-    action: 'Смотреть' 
-  },
-  { 
-    employee: 'Gregory Davis A', 
-    name: 'gregorydavis@dayrep.com', 
-    status: 'Оплачено', 
-    completed: 73, 
-    action: 'Смотреть' 
-  },
-  { 
-    employee: 'Gregory Davis A', 
-    name: 'gregorydavis@dayrep.com', 
-    status: 'Оплачено', 
-    completed: 73, 
-    action: 'Смотреть' 
-  },
-];
-
-
 export default function DashboardPage() {
-  const [user, setUser] = useState(mockProfile);
+  const [user, setUser] = useState<Partial<User>>({});
+  const [payments, setPayments] = useState<BitrixDeal[]>([]);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    // Fetch user profile
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/api/profile');
+        const data = await response.json();
+        if (data.success) {
+          setUser(data.user);
+          setUserName(data.user.login); // Assuming login is the name
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    // Fetch recent payments
+    const fetchPayments = async () => {
+      try {
+        const response = await fetch('/api/deals');
+        const data = await response.json();
+        if (data.success) {
+          // Show last 5 payments on dashboard
+          setPayments(data.deals.slice(0, 5));
+        }
+      } catch (error) {
+        console.error('Error fetching payments:', error);
+      } finally {
+        setLoadingPayments(false);
+      }
+    };
+
+    fetchProfile();
+    fetchPayments();
+  }, []);
+
+  const getPaymentStatus = (stageId: string) => {
+    const isPaid = ['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON'].includes(stageId);
+    return isPaid ? 'Оплачено' : 'Не оплачено';
+  };
+
+  const getStatusColor = (status: string) => {
+    return status === 'Оплачено'
+      ? 'bg-green-100 text-green-800'
+      : 'bg-red-100 text-red-800';
+  };
+
+  const getStatusDotColor = (status: string) => {
+    return status === 'Оплачено' ? 'bg-green-500' : 'bg-red-500';
+  };
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser(prevUser => ({ ...prevUser, [name]: value }));
   };
+
+  const renderProfileSkeletons = () => (
+    <div className="flex-1 space-y-4 animate-pulse">
+      {[...Array(4)].map((_, i) => (
+        <div key={i}>
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded w-full"></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderPaymentsSkeletons = () => (
+    <div className="space-y-2 sm:space-y-6 animate-pulse">
+      {[...Array(3)].map((_, index) => (
+        <div key={index} className="grid grid-cols-4 gap-2 sm:gap-6 items-center py-2 sm:py-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full"></div>
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-20 mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-28"></div>
+            </div>
+          </div>
+          <div><div className="h-6 bg-gray-200 rounded-full w-24"></div></div>
+          <div className="flex items-center space-x-1 sm:space-x-3">
+            <div className="w-14 sm:w-20 bg-gray-200 rounded-full h-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-8"></div>
+          </div>
+          <div><div className="h-5 bg-gray-200 rounded w-16"></div></div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white w-full">
@@ -66,7 +123,7 @@ export default function DashboardPage() {
           {/* Приветствие */}
           <div className="mb-6 sm:mb-10">
             <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
-              Привет, Алим  Джолдаспаев 👋
+              Привет, {userName || 'Гость'} 👋
             </h1>
           </div>
 
@@ -160,57 +217,59 @@ export default function DashboardPage() {
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </div>
-                
-                {/* Информация о пользователе */}
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-500 mb-1">Имя</label>
-                    <input 
-                      type="text"
-                      name="name"
-                      placeholder="Имя"
-                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                      value={user.name}
-                      onChange={handleProfileChange}
-                    />
+
+                {loadingProfile ? renderProfileSkeletons() : (
+                  /* Информация о пользователе */
+                  <div className="flex-1 space-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Логин</label>
+                      <input
+                        type="text"
+                        name="login"
+                        placeholder="Логин"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900 bg-gray-50"
+                        value={user.login || ''}
+                        readOnly
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900 bg-gray-50"
+                        value={user.email || ''}
+                        readOnly
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Телефон</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        placeholder="Телефон не указан"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
+                        value={''}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Адрес</label>
+                      <input
+                        type="text"
+                        name="address"
+                        placeholder="Адрес не указан"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
+                        value={''}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm text-gray-500 mb-1">Email</label>
-                    <input 
-                      type="email"
-                      name="email"
-                      placeholder="Email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                      value={user.email}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm text-gray-500 mb-1">Телефон</label>
-                    <input 
-                      type="tel"
-                      name="phone"
-                      placeholder="Телефон"
-                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                      value={user.phone}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm text-gray-500 mb-1">Адрес</label>
-                    <input 
-                      type="text"
-                      name="address"
-                      placeholder="Адрес"
-                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                      value={user.address}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -270,51 +329,55 @@ export default function DashboardPage() {
                         <div>Действие</div>
                       </div>
                       <div className="space-y-2 sm:space-y-6">
-                        {mockPayments.map((payment, index) => (
-                          <div key={index} className="grid grid-cols-4 gap-2 sm:gap-6 items-center py-2 sm:py-3">
-                            {/* Employee */}
-                            <div className="flex items-center space-x-2 sm:space-x-3">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                </svg>
+                        {loadingPayments ? renderPaymentsSkeletons() : (
+                          payments.map((payment) => {
+                            const status = getPaymentStatus(payment.STAGE_ID);
+                            return (
+                              <div key={payment.ID} className="grid grid-cols-4 gap-2 sm:gap-6 items-center py-2 sm:py-3">
+                                {/* Employee */}
+                                <div className="flex items-center space-x-2 sm:space-x-3">
+                                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">{payment.TITLE}</div>
+                                    <div className="text-xs sm:text-sm text-gray-500">Счет #{payment.ID}</div>
+                                  </div>
+                                </div>
+                                {/* Статус */}
+                                <div>
+                                  <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(status)}`}>
+                                    <div className={`w-2 h-2 rounded-full mr-1 sm:mr-2 ${getStatusDotColor(status)}`}></div>
+                                    {status}
+                                  </span>
+                                </div>
+                                {/* Выполнено */}
+                                <div className="flex items-center space-x-1 sm:space-x-3">
+                                  <div className="w-14 sm:w-20 bg-gray-200 rounded-full h-2">
+                                    <div
+                                      className={`${status === 'Оплачено' ? 'bg-green-500' : 'bg-yellow-500'} h-2 rounded-full`}
+                                      style={{ width: `${status === 'Оплачено' ? 100 : 50}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-xs sm:text-sm text-gray-500">{status === 'Оплачено' ? 100 : 50}%</span>
+                                </div>
+                                {/* Действие */}
+                                <div>
+                                  <a href="/payments" className="text-blue-600 text-xs sm:text-sm hover:text-blue-800 font-medium">
+                                    Смотреть
+                                  </a>
+                                </div>
                               </div>
-                              <div>
-                                <div className="text-xs sm:text-sm font-medium text-gray-900">{payment.employee}</div>
-                                <div className="text-xs sm:text-sm text-gray-500">{payment.name}</div>
-                              </div>
-                            </div>
-                            {/* Статус */}
-                            <div>
-                              <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                                payment.status === 'Оплачено' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                <div className={`w-2 h-2 rounded-full mr-1 sm:mr-2 ${
-                                  payment.status === 'Оплачено' ? 'bg-green-500' : 'bg-red-500'
-                                }`}></div>
-                                {payment.status}
-                              </span>
-                            </div>
-                            {/* Выполнено */}
-                            <div className="flex items-center space-x-1 sm:space-x-3">
-                              <div className="w-14 sm:w-20 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-green-500 h-2 rounded-full" 
-                                  style={{ width: `${payment.completed}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-xs sm:text-sm text-gray-500">{payment.completed}%</span>
-                            </div>
-                            {/* Действие */}
-                            <div>
-                              <button className="text-blue-600 text-xs sm:text-sm hover:text-blue-800 font-medium">
-                                {payment.action}
-                              </button>
-                            </div>
+                            );
+                          })
+                        )}
+                        {!loadingPayments && payments.length === 0 && (
+                          <div className="col-span-4 text-center py-8 text-gray-500">
+                            Платежи не найдены.
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>

@@ -22,6 +22,9 @@ export interface User {
   password: string;
   bitrix_contact_id?: string;
   created_at: string;
+  name?: string;
+  phone?: string;
+  address?: string;
 }
 
 export const createUser = (login: string, email: string, password: string, bitrixContactId?: string): User => {

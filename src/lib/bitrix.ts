@@ -70,15 +70,13 @@ export class BitrixAPI {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          cmd: 'crm.deal.list',
+          method: 'crm.deal.list',
           select: ['ID', 'TITLE', 'OPPORTUNITY', 'CURRENCY_ID', 'DATE_CREATE', 'STAGE_ID', 'STAGE_DESCRIPTION'],
-          filter: { '>OPPORTUNITY': 0 },
           order: { 'DATE_CREATE': 'DESC' }
         })
       });
 
       const data = await response.json();
-      
       if (data.result) {
         return data.result.map((deal: Record<string, unknown>) => ({
           ID: deal.ID as string,
@@ -90,7 +88,6 @@ export class BitrixAPI {
           STAGE_DESCRIPTION: deal.STAGE_DESCRIPTION as string
         }));
       }
-      
       return [];
     } catch (error) {
       console.error('Error fetching Bitrix deals:', error);
@@ -125,3 +122,12 @@ export class BitrixAPI {
 
 // Создаем экземпляр API (URL нужно будет настроить)
 export const bitrixAPI = new BitrixAPI(process.env.BITRIX_WEBHOOK_URL || '');
+
+const formatAmount = (amount: string, currency: string) => {
+  const numAmount = parseFloat(amount);
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: currency === 'KZT' ? 'KZT' : 'RUB', // RUB орнына KZT тексеру
+    minimumFractionDigits: 0
+  }).format(numAmount);
+};
