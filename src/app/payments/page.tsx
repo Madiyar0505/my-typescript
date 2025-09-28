@@ -10,14 +10,11 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { BitrixDeal } from '@/lib/bitrix';
-import dynamic from 'next/dynamic';
 
-const MuiFilter = dynamic(() => import('@/components/MuiFilter'), { ssr: false });
 
 export default function PaymentsPage() {
   const [deals, setDeals] = useState<BitrixDeal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({
+    const [filter] = useState({
     search: '',
     status: 'all',
     sortBy: 'date'
@@ -38,8 +35,6 @@ export default function PaymentsPage() {
       }
     } catch (error) {
       console.error('Error fetching deals:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -63,27 +58,7 @@ export default function PaymentsPage() {
     }
   };
 
-  const getStatusText = (stageId: string) => {
-    switch (stageId) {
-      case 'NEW':
-        return 'Новая';
-      case 'PREPARATION':
-        return 'В работе';
-      case 'PREPAYMENT_INVOICE':
-        return 'Ожидает оплаты';
-      case 'EXECUTING':
-        return 'Выполняется';
-      case 'FINAL_INVOICE':
-        return 'Счет выставлен';
-      case 'WON':
-        return 'Оплачено';
-      case 'LOSE':
-        return 'Отменена';
-      default:
-        return 'Неизвестно';
-    }
-  };
-
+  
   // ...existing code for filteredDeals, sortedDeals, etc.
 
   // Place the return statement for the component here (not inside getStatusText)
@@ -115,24 +90,12 @@ export default function PaymentsPage() {
     return date.toLocaleDateString('ru-RU');
   }
 
-  function formatAmount(amount: string | number, _currency: string) {
+  function formatAmount(amount: string | number) {
     // Always show KZT
     return `${Number(amount).toLocaleString('ru-RU')} ₸`;
   }
 
-  function getStatusColor(stageId: string) {
-    switch (stageId) {
-      case 'WON':
-        return 'bg-green-100 text-green-800';
-      case 'LOSE':
-        return 'bg-red-100 text-red-800';
-      case 'PREPAYMENT_INVOICE':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  }
-
+  
   // По ТЗ: оплачено, когда этап "В работе" и все последующие
   const paidStages = new Set(['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON']);
   function isPaid(stageId: string) {
@@ -178,7 +141,7 @@ export default function PaymentsPage() {
                   <tr key={deal.ID} className="border-b border-gray-100">
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{deal.ID}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatDate(deal.DATE_CREATE)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatAmount(deal.OPPORTUNITY, deal.CURRENCY_ID)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatAmount(deal.OPPORTUNITY)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal">
                       {isPaid(deal.STAGE_ID) ? (
                         <span className="text-blue-400">Оплачено</span>

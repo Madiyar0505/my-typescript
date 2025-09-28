@@ -94,7 +94,7 @@ export class BitrixAPI {
         };
       }
       return null;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -106,7 +106,7 @@ export class BitrixAPI {
         order: { 'DATE_CREATE': 'DESC' }
       });
       return deals || [];
-    } catch (_error) {
+    } catch {
       return [];
     }
   }
@@ -120,7 +120,7 @@ export class BitrixAPI {
         }
       });
       return !!result;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -139,7 +139,7 @@ export class BitrixAPI {
         start: options?.start ?? 0,
       });
       return deals || [];
-    } catch (_error) {
+    } catch {
       return [];
     }
   }
@@ -149,7 +149,7 @@ export class BitrixAPI {
     try {
       const deal = await this.call<T>('crm.deal.get', { id: dealId });
       return deal || null;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -159,7 +159,7 @@ export class BitrixAPI {
     try {
       const rows = await this.call<BitrixProductRow[]>('crm.deal.productrows.get', { id: dealId });
       return rows || [];
-    } catch (_error) {
+    } catch {
       return [];
     }
   }
@@ -169,7 +169,7 @@ export class BitrixAPI {
     try {
       const result = await this.call<number>('crm.deal.add', { fields });
       return result ? String(result) : null;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -179,7 +179,7 @@ export class BitrixAPI {
     try {
       const result = await this.call<boolean>('crm.deal.productrows.set', { id: dealId, rows });
       return !!result;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

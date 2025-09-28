@@ -55,7 +55,7 @@ export default function RegisterPage() {
       } else {
         setErrors(data.errors || [{ field: 'general', message: 'Ошибка регистрации' }]);
       }
-    } catch (_error) {
+    } catch {
       setErrors([{ field: 'general', message: 'Ошибка соединения с сервером' }]);
     } finally {
       setIsLoading(false);
