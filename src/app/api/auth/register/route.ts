@@ -44,14 +44,32 @@ export async function POST(request: NextRequest) {
     // Создание пользователя в БД
     const user = createUser(login, email, password, bitrixContact?.ID);
 
-    return NextResponse.json({
+    // Устанавливаем сессионные куки, чтобы сразу быть авторизованным
+    const res = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         login: user.login,
-        email: user.email
+        email: user.email,
+        bitrix_contact_id: user.bitrix_contact_id,
       }
     });
+
+    res.cookies.set('session_login', user.login, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    res.cookies.set('session_user_id', String(user.id), {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return res;
 
   } catch (error) {
     console.error('Registration error:', error);

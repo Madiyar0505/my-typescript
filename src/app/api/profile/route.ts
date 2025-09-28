@@ -1,30 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByLogin } from '@/lib/database';
 
-// Мок профиль (логин: testuser)
-const mockProfile = {
-  login: 'testuser',
-  email: 'testuser@mail.com',
-  name: 'Тестовый Пользователь',
-  phone: '+7 (777) 123-45-67',
-  address: 'г. Алматы, ул. Абая 10',
+const defaultProfile = {
+  name: 'Пользователь',
+  phone: '',
+  address: '',
 };
 
 export async function GET(request: NextRequest) {
-  // В реальном проекте логин берется из сессии/токена
-  // Здесь для теста всегда testuser
-  const user = getUserByLogin('testuser');
-  if (user) {
-    return NextResponse.json({ success: true, user: { ...user, ...mockProfile } });
-  } else {
-    // Если нет в БД, возвращаем мок
-    return NextResponse.json({ success: true, user: mockProfile });
+  // Resolve user from cookie set at login
+  const loginCookie = request.cookies.get('session_login')?.value;
+
+  if (!loginCookie) {
+    // Not authenticated; return guest profile
+    return NextResponse.json({ success: true, user: { login: 'Гость', email: '', ...defaultProfile } });
   }
+
+  const user = getUserByLogin(loginCookie);
+  if (!user) {
+    return NextResponse.json({ success: true, user: { login: loginCookie, email: '', ...defaultProfile } });
+  }
+
+  return NextResponse.json({ success: true, user: {
+    id: user.id,
+    login: user.login,
+    email: user.email,
+    phone: user.phone || '',
+    address: user.address || '',
+    bitrix_contact_id: user.bitrix_contact_id,
+  }});
 }
 
 export async function PUT(request: NextRequest) {
-  // Здесь можно реализовать обновление профиля (мок)
+  // For now, just echo back changes (persisting not implemented)
   const body = await request.json();
-  // Просто возвращаем то, что прислали
-  return NextResponse.json({ success: true, user: { ...mockProfile, ...body } });
+  return NextResponse.json({ success: true, user: body });
 }

@@ -133,8 +133,14 @@ export default function PaymentsPage() {
     }
   }
 
+  // По ТЗ: оплачено, когда этап "В работе" и все последующие
+  const paidStages = new Set(['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON']);
+  function isPaid(stageId: string) {
+    return paidStages.has(stageId);
+  }
+
   function canPay(stageId: string) {
-    return stageId !== 'WON' && stageId !== 'LOSE';
+    return !isPaid(stageId) && stageId !== 'LOSE';
   }
 
   return (
@@ -174,14 +180,14 @@ export default function PaymentsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatDate(deal.DATE_CREATE)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal text-black">{formatAmount(deal.OPPORTUNITY, deal.CURRENCY_ID)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal">
-                      {deal.STAGE_ID === 'WON' ? (
+                      {isPaid(deal.STAGE_ID) ? (
                         <span className="text-blue-400">Оплачено</span>
                       ) : (
                         <span className="text-gray-500">Не оплачено</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-base font-normal">
-                      {deal.STAGE_ID !== 'WON' ? (
+                      {canPay(deal.STAGE_ID) ? (
                         <button
                           onClick={() => handlePayment(deal.ID)}
                           className="bg-black text-white px-5 py-1.5 rounded transition-colors hover:bg-gray-800"

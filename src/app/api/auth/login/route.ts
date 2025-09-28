@@ -1,54 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByLogin, verifyPassword } from '@/lib/database';
-import { validateLoginForm } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { login, password } = body;
+    const { login, password } = body || {};
 
-    // Валидация формы
-    const validationErrors = validateLoginForm({ login, password });
-
-    if (validationErrors.length > 0) {
-      return NextResponse.json(
-        { errors: validationErrors },
-        { status: 400 }
-      );
+    if (!login || !password) {
+      return NextResponse.json({ success: false, errors: [{ field: 'general', message: 'Логин и пароль обязательны' }] }, { status: 400 });
     }
 
-    // Поиск пользователя
     const user = getUserByLogin(login);
-
     if (!user) {
-      return NextResponse.json(
-        { errors: [{ field: 'login', message: 'Неверный логин или пароль' }] },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, errors: [{ field: 'general', message: 'Неверный логин или пароль' }] }, { status: 401 });
     }
 
-    // Проверка пароля
-    if (!verifyPassword(password, user.password)) {
-      return NextResponse.json(
-        { errors: [{ field: 'password', message: 'Неверный логин или пароль' }] },
-        { status: 401 }
-      );
+    const valid = verifyPassword(password, user.password);
+    if (!valid) {
+      return NextResponse.json({ success: false, errors: [{ field: 'general', message: 'Неверный логин или пароль' }] }, { status: 401 });
     }
 
-    return NextResponse.json({
+    // Set session cookies
+    const res = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         login: user.login,
-        email: user.email
+        email: user.email,
+        bitrix_contact_id: user.bitrix_contact_id,
       }
     });
 
+    // HttpOnly cookie with login to resolve current session
+    res.cookies.set('session_login', user.login, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Optional: also store user id
+    res.cookies.set('session_user_id', String(user.id), {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return res;
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, errors: [{ field: 'general', message: 'Внутренняя ошибка сервера' }] }, { status: 500 });
   }
 }

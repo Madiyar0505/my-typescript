@@ -12,10 +12,14 @@ import { User } from '@/lib/database';
 
 // Моковые данные для заказов
 const mockOrders = [
-  { id: 1, title: 'Счета на оплату для Юр. Лиц', status: '', amount: ' ', date: '', button: 'Скачать', imageUrl: '/image.png' },
-  { id: 2, title: 'Гарантия на детали для переднего бампера', status: '', amount: ' ', date: '', button: 'Скачать', imageUrl: '/imageee.png' },
-  { id: 3, title: 'Чеки для Физ.лиц', status: '', amount: '', date: '', button: 'Скачать', imageUrl: '/imageewewew.png' },
-  { id: 4, title: 'Счета на оплату для Юр. Лиц', status: '', amount: '', date: '', button: 'Скачать', imageUrl: '/image.png' },
+  { id: 1, title: 'Счета на оплату для Юр. Лиц', imageUrl: '/image.png' },
+  { id: 2, title: 'Гарантия на детали для переднего бампера', imageUrl: '/imageee.png' },
+  { id: 3, title: 'Чеки для Физ.лиц', imageUrl: '/imageewewew.png' },
+  { id: 4, title: 'Счета на оплату для Юр. Лиц', imageUrl: '/image.png' },
+  { id: 5, title: 'Договор на техническое обслуживание', imageUrl: '/image.png' },
+  { id: 6, title: 'Акт выполненных работ по заказу #5512', imageUrl: '/imageee.png' },
+  { id: 7, title: 'Возврат товара: передний бампер', imageUrl: '/imageewewew.png' },
+  { id: 8, title: 'Инструкция по эксплуатации', imageUrl: '/image.png' },
 ];
 
 export default function DashboardPage() {
@@ -23,7 +27,6 @@ export default function DashboardPage() {
   const [payments, setPayments] = useState<BitrixDeal[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingPayments, setLoadingPayments] = useState(true);
-  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     // Fetch user profile
@@ -33,7 +36,6 @@ export default function DashboardPage() {
         const data = await response.json();
         if (data.success) {
           setUser(data.user);
-          setUserName(data.user.login); // Assuming login is the name
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -62,9 +64,10 @@ export default function DashboardPage() {
     fetchPayments();
   }, []);
 
+  const paidStages = new Set(['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON']);
+
   const getPaymentStatus = (stageId: string) => {
-    const isPaid = ['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON'].includes(stageId);
-    return isPaid ? 'Оплачено' : 'Не оплачено';
+    return paidStages.has(stageId) ? 'Оплачено' : 'Не оплачено';
   };
 
   const getStatusColor = (status: string) => {
@@ -80,6 +83,27 @@ export default function DashboardPage() {
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser(prevUser => ({ ...prevUser, [name]: value }));
+  };
+
+  const handleDownload = async (imageUrl: string, title: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      // Файл атын суреттің соңғы бөлігінен немесе тақырыптан аламыз
+      const fileName = imageUrl.split('/').pop() || title.replace(/ /g, '_') + '.png';
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      alert('Суретті жүктеу кезінде қате пайда болды.');
+    }
   };
 
   const renderProfileSkeletons = () => (
@@ -123,7 +147,7 @@ export default function DashboardPage() {
           {/* Приветствие */}
           <div className="mb-6 sm:mb-10">
             <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
-              Привет, {userName || 'Гость'} 👋
+              Привет, {user.login || 'Гость'} 👋
             </h1>
           </div>
 
@@ -166,12 +190,15 @@ export default function DashboardPage() {
                       <div className="flex-1 flex flex-col justify-between">
                         <h3 className="font-bold text-gray-900 text-lg leading-tight mb-0">{order.title}</h3>
                         <div className="mb-1">
-                          <span className="text-gray-500 text-sm">{order.status}</span>
+                          <span className="text-gray-500 text-sm"></span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900 mb-0">{order.amount}</p>
-                        <p className="text-gray-500 text-sm">{order.date}</p>
+                        <p className="text-2xl font-bold text-gray-900 mb-0"></p>
+                        <p className="text-gray-500 text-sm"></p>
                       </div>
-                      <button className="w-full bg-blue-600 text-white px-2 py-2 rounded-lg text-base font-medium hover:bg-blue-700 flex items-center justify-center space-x-2 transition-colors mt-auto">
+                      <button
+                        onClick={() => handleDownload(order.imageUrl, order.title)}
+                        className="w-full bg-blue-600 text-white px-2 py-2 rounded-lg text-base font-medium hover:bg-blue-700 flex items-center justify-center space-x-2 transition-colors mt-auto"
+                      >
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
@@ -252,7 +279,7 @@ export default function DashboardPage() {
                         name="phone"
                         placeholder="Телефон не указан"
                         className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                        value={''}
+                        value={user.phone || ''}
                         onChange={handleProfileChange}
                       />
                     </div>
@@ -264,7 +291,7 @@ export default function DashboardPage() {
                         name="address"
                         placeholder="Адрес не указан"
                         className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                        value={''}
+                        value={user.address || ''}
                         onChange={handleProfileChange}
                       />
                     </div>
