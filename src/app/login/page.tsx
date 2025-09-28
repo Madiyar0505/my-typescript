@@ -52,7 +52,7 @@ export default function LoginPage() {
       } else {
         setErrors(data.errors || [{ field: 'general', message: 'Ошибка входа' }]);
       }
-    } catch (_error) {
+    } catch { // Бұл жерде _error айнымалысы қолданылмайтындықтан, оны алып тастаймыз
       setErrors([{ field: 'general', message: 'Ошибка соединения с сервером' }]);
     } finally {
       setIsLoading(false);
