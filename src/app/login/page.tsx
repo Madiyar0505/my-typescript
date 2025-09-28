@@ -52,7 +52,8 @@ export default function LoginPage() {
       } else {
         setErrors(data.errors || [{ field: 'general', message: 'Ошибка входа' }]);
       }
-    } catch { // Бұл жерде _error айнымалысы қолданылмайтындықтан, оны алып тастаймыз
+    } catch (error) {
+      console.error("Login API error:", error);
       setErrors([{ field: 'general', message: 'Ошибка соединения с сервером' }]);
     } finally {
       setIsLoading(false);
