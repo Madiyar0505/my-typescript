@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { bitrixAPI } from '@/lib/bitrix';
 import { mockDeals } from '@/lib/mockData';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     // Если вебхук не настроен — отдаем мок-данные, чтобы страница работала
     if (!process.env.BITRIX_WEBHOOK_URL) {
