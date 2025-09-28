@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { validateLoginForm } from '@/lib/validation';
 import { ValidationError } from '@/lib/validation';
@@ -51,7 +52,7 @@ export default function LoginPage() {
       } else {
         setErrors(data.errors || [{ field: 'general', message: 'Ошибка входа' }]);
       }
-    } catch (error) {
+    } catch (_error) {
       setErrors([{ field: 'general', message: 'Ошибка соединения с сервером' }]);
     } finally {
       setIsLoading(false);
@@ -146,18 +147,13 @@ export default function LoginPage() {
         {/* Оң жақ: фото 40% */}
         <div className="hidden md:flex w-[40%] h-full">
           <div className="relative w-full h-full">
-            <img
+            <Image
               src="/Frame 2095585499.png"
               alt="Hyundai Santa Fe"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback если изображение не загрузилось
-                e.currentTarget.style.display = 'none';
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                if (fallback) {
-                  fallback.style.display = 'flex';
-                }
-              }}
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 40vw, 0vw"
+              priority
             />
             <div className="w-full h-full bg-gray-300 flex items-center justify-center absolute inset-0" style={{display: 'none'}}>
               <span className="text-gray-500 text-lg">Изображение автомобиля</span>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import Image from 'next/image';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -174,17 +175,14 @@ export default function DashboardPage() {
                 {mockOrders.map((order) => (
                   <SwiperSlide key={order.id}>
                     <div className="bg-white border border-gray-200 rounded-xl p-2 sm:p-4 h-full shadow-sm flex flex-col min-h-[270px] sm:min-h-[370px]">
-                      <div className="w-full h-32 sm:h-48 bg-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
+                      <div className="w-full h-32 sm:h-48 bg-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden relative">
                         {/* Фото орны: әр карточкаға жеке сурет қойыңыз */}
-                        <img
+                        <Image
                           src={order.imageUrl}
                           alt={order.title}
-                          className="w-full h-full object-cover"
-                          onError={e => {
-                            e.currentTarget.style.display = 'none';
-                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />
                       </div>
                       <div className="flex-1 flex flex-col justify-between">
@@ -322,10 +320,12 @@ export default function DashboardPage() {
                 
                 <div className="relative w-full flex justify-center items-center">
                   <div className="w-full aspect-video min-h-[180px] sm:min-h-[320px] min-w-[180px] sm:min-w-[320px] bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img 
-                      src="/Frame 2095585319.png" 
+                    <Image
+                      src="/Frame 2095585319.png"
                       alt="Мастерская по ремонту автомобилей"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 1024px) 40vw, 100vw"
                     />
                   </div>
                 </div>

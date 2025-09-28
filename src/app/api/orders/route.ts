@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { bitrixAPI } from '@/lib/bitrix';
+import { bitrixAPI, BitrixDeal } from '@/lib/bitrix';
 import { getUserByLogin } from '@/lib/database';
 
 // NOTE:
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const user = getUserByLogin('testuser');
     const contactId = user?.bitrix_contact_id;
 
-    let deals = [] as any[];
+    let deals: BitrixDeal[] = [];
 
     if (contactId) {
       deals = await bitrixAPI.listDealsByContact(contactId, {

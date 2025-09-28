@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 
 // UI ти��і
@@ -28,8 +28,9 @@ export default function OrdersPage() {
       const data = await res.json();
       if (!data.success) throw new Error(data.message || 'Failed to load orders');
       setDeals(data.deals || []);
-    } catch (e: any) {
-      setError(e.message || 'Network error');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Network error';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -66,8 +67,9 @@ export default function OrdersPage() {
       // Reload list after repeat
       await loadDeals();
       alert('Заказ повторен');
-    } catch (e: any) {
-      alert(e.message || 'Ошибка');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Ошибка';
+      alert(message);
     } finally {
       setRepeatBusyId(null);
     }

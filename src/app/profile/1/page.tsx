@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { User } from '@/lib/database';
 
-export default function ProfilePage({ params }: Readonly<{ params: { id: string } }>) {
+export default function ProfilePage({ params: _params }: Readonly<{ params: { id: string } }>) {
   const [user, setUser] = useState<Partial<User>>({});
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);

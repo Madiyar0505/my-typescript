@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server';
 import { bitrixAPI } from '@/lib/bitrix';
 import { getUserByLogin } from '@/lib/database';
 
+interface BitrixDealDetails {
+  ID: string;
+  TITLE?: string;
+  CONTACT_ID?: string | number | null;
+  COMPANY_ID?: string | number | null;
+  CATEGORY_ID?: string | number | null;
+  CURRENCY_ID?: string | null;
+  ASSIGNED_BY_ID?: string | number | null;
+}
+
+type DealCreateFields = {
+  TITLE: string;
+  CONTACT_ID?: string | number;
+  COMPANY_ID?: string | number;
+  CATEGORY_ID?: string | number;
+  CURRENCY_ID?: string | null;
+  ASSIGNED_BY_ID?: string | number;
+  STAGE_ID?: string;
+};
+
 // Next.js 15: context must be awaited
 export async function POST(request: Request, contextPromise: Promise<{ params: { id: string } }>) {
   const { params } = await contextPromise;
@@ -16,7 +36,7 @@ export async function POST(request: Request, contextPromise: Promise<{ params: {
     const user = getUserByLogin('testuser');
     const currentContactId = user?.bitrix_contact_id;
 
-    const original = await bitrixAPI.getDeal<any>(id);
+    const original = await bitrixAPI.getDeal<BitrixDealDetails>(id);
     if (!original) {
       return NextResponse.json({ success: false, message: 'Original deal not found' }, { status: 404 });
     }
@@ -30,18 +50,18 @@ export async function POST(request: Request, contextPromise: Promise<{ params: {
     const rows = await bitrixAPI.getDealProductRows(id);
 
     // Prepare fields for new deal
-    const newDealFields: Record<string, any> = {
+    const newDealFields: DealCreateFields = {
       TITLE: `${original.TITLE || 'Заказ'} (повтор)`,
-      CONTACT_ID: original.CONTACT_ID,
+      CONTACT_ID: original.CONTACT_ID ?? undefined,
       COMPANY_ID: original.COMPANY_ID ?? undefined,
       CATEGORY_ID: original.CATEGORY_ID ?? undefined,
-      CURRENCY_ID: original.CURRENCY_ID ?? 'KZT',
+      CURRENCY_ID: (original.CURRENCY_ID as string | null) ?? 'KZT',
       ASSIGNED_BY_ID: original.ASSIGNED_BY_ID ?? undefined,
       // Start stage. Adjust if your pipeline has a specific first stage id
       STAGE_ID: 'NEW',
     };
 
-    const newDealId = await bitrixAPI.addDeal(newDealFields);
+    const newDealId = await bitrixAPI.addDeal(newDealFields as Record<string, any>);
     if (!newDealId) {
       return NextResponse.json({ success: false, message: 'Failed to create new deal' }, { status: 500 });
     }

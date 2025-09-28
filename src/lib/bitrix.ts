@@ -17,6 +17,13 @@ export interface BitrixDeal {
   STAGE_DESCRIPTION: string;
 }
 
+export interface BitrixProductRow {
+  PRODUCT_ID?: string | number;
+  PRICE?: number | string;
+  QUANTITY?: number | string;
+  [key: string]: unknown;
+}
+
 interface BitrixResponse<T> {
   result: T;
   error?: {
@@ -87,7 +94,7 @@ export class BitrixAPI {
         };
       }
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -99,7 +106,7 @@ export class BitrixAPI {
         order: { 'DATE_CREATE': 'DESC' }
       });
       return deals || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -113,7 +120,7 @@ export class BitrixAPI {
         }
       });
       return !!result;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -132,47 +139,47 @@ export class BitrixAPI {
         start: options?.start ?? 0,
       });
       return deals || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
 
   // Get single deal by ID
-  async getDeal<T = any>(dealId: string): Promise<T | null> {
+  async getDeal<T = unknown>(dealId: string): Promise<T | null> {
     try {
       const deal = await this.call<T>('crm.deal.get', { id: dealId });
       return deal || null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
 
   // Get product rows for a deal
-  async getDealProductRows(dealId: string): Promise<any[]> {
+  async getDealProductRows(dealId: string): Promise<BitrixProductRow[]> {
     try {
-      const rows = await this.call<any[]>('crm.deal.productrows.get', { id: dealId });
+      const rows = await this.call<BitrixProductRow[]>('crm.deal.productrows.get', { id: dealId });
       return rows || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
 
   // Create a new deal
-  async addDeal(fields: Record<string, any>): Promise<string | null> {
+  async addDeal(fields: Record<string, unknown>): Promise<string | null> {
     try {
       const result = await this.call<number>('crm.deal.add', { fields });
       return result ? String(result) : null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
 
   // Set product rows to a deal
-  async setDealProductRows(dealId: string, rows: any[]): Promise<boolean> {
+  async setDealProductRows(dealId: string, rows: BitrixProductRow[]): Promise<boolean> {
     try {
       const result = await this.call<boolean>('crm.deal.productrows.set', { id: dealId, rows });
       return !!result;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -180,12 +187,3 @@ export class BitrixAPI {
 
 // Создаем экземпляр API (URL нужно будет настроить)
 export const bitrixAPI = new BitrixAPI(process.env.BITRIX_WEBHOOK_URL || '');
-
-const formatAmount = (amount: string, currency: string) => {
-  const numAmount = parseFloat(amount);
-  return new Intl.NumberFormat('kz-KZ', {
-    style: 'currency',
-    currency: currency === 'KZT' ? 'KZT' : 'RUB', // RUB орнына KZT тексеру
-    minimumFractionDigits: 0
-  }).format(numAmount);
-};
