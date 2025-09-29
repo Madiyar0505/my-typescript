@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByLogin } from '@/lib/database';
 
+export const runtime = 'nodejs';
+
 const defaultProfile = {
   name: 'Пользователь',
   phone: '',

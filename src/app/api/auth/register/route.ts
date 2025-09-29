@@ -3,6 +3,8 @@ import { createUser, getUserByLogin, getUserByEmail } from '@/lib/database';
 import { validateRegistrationForm } from '@/lib/validation';
 import { bitrixAPI } from '@/lib/bitrix';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

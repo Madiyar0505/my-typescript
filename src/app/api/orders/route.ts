@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { bitrixAPI, BitrixDeal } from '@/lib/bitrix';
 import { getUserByLogin } from '@/lib/database';
 
+export const runtime = 'nodejs';
+
 // NOTE:
 // Аутентификация әзір толық емес болғандықтан, уақытша "testuser" арқылы
 // БД-дан bitrix_contact_id аламыз. Кейін нақты сессия/куки арқылы алмастыру керек.

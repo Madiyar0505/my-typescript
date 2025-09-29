@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { bitrixAPI } from '@/lib/bitrix'
 import { getUserByLogin } from '@/lib/database'
 
+export const runtime = 'nodejs'
+
 interface BitrixDealDetails {
   ID: string
   TITLE?: string

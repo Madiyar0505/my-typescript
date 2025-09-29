@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { bitrixAPI } from '@/lib/bitrix';
 import { mockDeals } from '@/lib/mockData';
 
+export const runtime = 'nodejs';
+
 export async function GET() {
   try {
     // Если вебхук не настроен — отдаем мок-данные, чтобы страница работала
