@@ -61,7 +61,9 @@ export async function POST(request: Request, contextPromise: Promise<{ params: {
       STAGE_ID: 'NEW',
     };
 
-    const newDealId = await bitrixAPI.addDeal(newDealFields as Record<string, any>);
+    const newDealId = await bitrixAPI.addDeal(
+  newDealFields as Record<string, any>
+);
     if (!newDealId) {
       return NextResponse.json({ success: false, message: 'Failed to create new deal' }, { status: 500 });
     }
