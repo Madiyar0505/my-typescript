@@ -36,7 +36,8 @@ export async function POST(
   }
 
   try {
-    const user = getUserByLogin('testuser')
+    // 🔹 Асинхронды шақыруға await қостық
+    const user = await getUserByLogin('testuser')
     const currentContactId = user?.bitrix_contact_id
 
     const original = await bitrixAPI.getDeal<BitrixDealDetails>(id)
@@ -47,7 +48,10 @@ export async function POST(
       )
     }
 
-    if (currentContactId && String(original.CONTACT_ID) !== String(currentContactId)) {
+    if (
+      currentContactId &&
+      String(original.CONTACT_ID) !== String(currentContactId)
+    ) {
       return NextResponse.json(
         { success: false, message: 'Forbidden' },
         { status: 403 }
@@ -66,7 +70,6 @@ export async function POST(
       STAGE_ID: 'NEW'
     }
 
-    // ESLint-ке ұрыспау үшін unknown-ға ауыстырдық
     const newDealId = await bitrixAPI.addDeal(
       newDealFields as Record<string, unknown>
     )
@@ -91,4 +94,3 @@ export async function POST(
     )
   }
 }
-   
