@@ -74,8 +74,8 @@ export async function POST(request: Request, contextPromise: Promise<{ params: {
     // Optionally, trigger payment stage change or payment url creation here.
     // For now, just return the new deal id.
     return NextResponse.json({ success: true, newDealId });
-  } catch (error) {
-    console.error('POST /api/orders/[id]/repeat error:', error);
-    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
-  }
+  } catch (error: unknown) {
+  console.error('GET /api/orders error:', error);
+  return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
+}
 }
