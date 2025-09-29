@@ -38,7 +38,7 @@ export async function POST(
   }
 
   try {
-    // 🔹 Асинхронды шақыруға await қостық
+    
     const user = await getUserByLogin('testuser')
     const currentContactId = user?.bitrix_contact_id
 

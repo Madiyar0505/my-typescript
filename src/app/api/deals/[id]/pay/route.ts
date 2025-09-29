@@ -4,74 +4,45 @@ import { getUserByLogin } from '@/lib/database'
 
 export const runtime = 'nodejs'
 
-interface BitrixDealDetails {
-  ID: string
-  TITLE?: string
-  CONTACT_ID?: string | number | null
-  COMPANY_ID?: string | number | null
-  CATEGORY_ID?: string | number | null
-  CURRENCY_ID?: string | null
-  ASSIGNED_BY_ID?: string | number | null
-}
-
-type DealCreateFields = {
-  TITLE: string
-  CONTACT_ID?: string | number
-  COMPANY_ID?: string | number
-  CATEGORY_ID?: string | number
-  CURRENCY_ID?: string | null
-  ASSIGNED_BY_ID?: string | number
-  STAGE_ID?: string
-}
-
 export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> } // 👈 міндетті түрде Promise
+	request: NextRequest,
+	context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params // 👈 await керек
+	const { id } = await context.params
 
-  if (!id) {
-    return NextResponse.json({ success: false, message: 'Deal ID is required' }, { status: 400 })
-  }
+	if (!id) {
+		return NextResponse.json({ success: false, message: 'Deal ID is required' }, { status: 400 })
+	}
 
-  try {
-    const user = getUserByLogin('testuser')
-    const currentContactId = user?.bitrix_contact_id
+	try {
+		const user = getUserByLogin('testuser')
+		const currentContactId = user?.bitrix_contact_id
 
-    const original = await bitrixAPI.getDeal<BitrixDealDetails>(id)
-    if (!original) {
-      return NextResponse.json({ success: false, message: 'Original deal not found' }, { status: 404 })
-    }
+		const original = await bitrixAPI.getDeal<unknown>(id)
+		if (!original) {
+			return NextResponse.json({ success: false, message: 'Original deal not found' }, { status: 404 })
+		}
 
-    if (currentContactId && String(original.CONTACT_ID) !== String(currentContactId)) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
-    }
+		if (currentContactId) {
+			const originalContactId = (original as { CONTACT_ID?: string | number | null } | null)?.CONTACT_ID
+			if (String(originalContactId) !== String(currentContactId)) {
+				return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
+			}
+		}
 
-    const rows = await bitrixAPI.getDealProductRows(id)
+		let targetStage = (await request.json().catch(() => ({})))?.stageId as string | undefined
+		if (!targetStage) {
+			targetStage = process.env.BITRIX_WORK_STAGE_ID || 'WORK'
+		}
 
-    const newDealFields: DealCreateFields = {
-      TITLE: `${original.TITLE || 'Заказ'} (повтор)`,
-      CONTACT_ID: original.CONTACT_ID ?? undefined,
-      COMPANY_ID: original.COMPANY_ID ?? undefined,
-      CATEGORY_ID: original.CATEGORY_ID ?? undefined,
-      CURRENCY_ID: (original.CURRENCY_ID as string | null) ?? 'KZT',
-      ASSIGNED_BY_ID: original.ASSIGNED_BY_ID ?? undefined,
-      STAGE_ID: 'NEW'
-    }
+		const updated = await bitrixAPI.updateDealStage(id, targetStage)
+		if (!updated) {
+			return NextResponse.json({ success: false, message: 'Failed to update deal stage' }, { status: 500 })
+		}
 
-    const newDealId = await bitrixAPI.addDeal(newDealFields as Record<string, unknown>)
-
-    if (!newDealId) {
-      return NextResponse.json({ success: false, message: 'Failed to create new deal' }, { status: 500 })
-    }
-
-    if (rows && rows.length > 0) {
-      await bitrixAPI.setDealProductRows(newDealId, rows)
-    }
-
-    return NextResponse.json({ success: true, newDealId })
-  } catch (error: unknown) {
-    console.error('POST /api/orders error:', error)
-    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
-  }
+		return NextResponse.json({ success: true, dealId: id, stageId: targetStage })
+	} catch (error: unknown) {
+		console.error('POST /api/deals/[id]/pay error:', error)
+		return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
+	}
 }

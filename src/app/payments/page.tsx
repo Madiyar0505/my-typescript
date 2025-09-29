@@ -1,9 +1,3 @@
-'// Платежи беті Bitrix24-тің "Сделки" (deals) арқылы жұмыс істейді.\n'
-'// 1. Бұл бет /api/deals API-іне сұраныс жібереді.\n'
-'// 2. /api/deals Bitrix24 API-інен барлық мәмілелерді (deals) алады.\n'
-'// 3. Әр мәміле — бұл төлем жолы (номер счета, дата, сумма, статус, действие).\n'
-'// 4. "Оплатить" басқанда /api/deals/[id]/pay Bitrix24-те статусын "Оплачено" (WON) деп жаңартады.\n'
-'// Яғни, барлық төлемдер мен төлемді растау Bitrix24 API арқылы орындалады.\n'
 'use client';
 
 
@@ -59,12 +53,7 @@ export default function PaymentsPage() {
   };
 
   
-  // ...existing code for filteredDeals, sortedDeals, etc.
-
-  // Place the return statement for the component here (not inside getStatusText)
-// ...existing code...
-
-  // Filtering and sorting logic
+  
   const filteredDeals = deals.filter((deal) => {
     const searchMatch =
       deal.ID.toString().includes(filter.search) ||
@@ -84,19 +73,19 @@ export default function PaymentsPage() {
     return 0;
   });
 
-  // Helper functions
+
   function formatDate(dateStr: string) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ru-RU');
   }
 
   function formatAmount(amount: string | number) {
-    // Always show KZT
+    
     return `${Number(amount).toLocaleString('ru-RU')} ₸`;
   }
 
   
-  // По ТЗ: оплачено, когда этап "В работе" и все последующие
+  
   const paidStages = new Set(['PREPARATION', 'PREPAYMENT_INVOICE', 'EXECUTING', 'FINAL_INVOICE', 'WON']);
   function isPaid(stageId: string) {
     return paidStages.has(stageId);
@@ -170,6 +159,50 @@ export default function PaymentsPage() {
               <p className="text-gray-500">Сделки не найдены</p>
             </div>
           )}
+        </div>
+
+        {/* Mobile list */}
+        <div className="md:hidden space-y-3">
+          {sortedDeals.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Сделки не найдены</p>
+            </div>
+          )}
+
+          {sortedDeals.map((deal) => (
+            <div key={deal.ID} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-500">Номер счета</div>
+                <div className="text-base font-medium text-black">{deal.ID}</div>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-500">Дата</div>
+                <div className="text-base text-black">{formatDate(deal.DATE_CREATE)}</div>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-500">Сумма</div>
+                <div className="text-base text-black">{formatAmount(deal.OPPORTUNITY)}</div>
+              </div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-500">Статус</div>
+                <div className="text-base">
+                  {isPaid(deal.STAGE_ID) ? (
+                    <span className="text-blue-500">Оплачено</span>
+                  ) : (
+                    <span className="text-gray-500">Не оплачено</span>
+                  )}
+                </div>
+              </div>
+              {canPay(deal.STAGE_ID) && (
+                <button
+                  onClick={() => handlePayment(deal.ID)}
+                  className="w-full bg-black text-white py-2 rounded-md active:opacity-90"
+                >
+                  Оплатить
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </main>
     </div>

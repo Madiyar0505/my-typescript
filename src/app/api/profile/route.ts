@@ -10,11 +10,11 @@ const defaultProfile = {
 };
 
 export async function GET(request: NextRequest) {
-  // Resolve user from cookie set at login
+
   const loginCookie = request.cookies.get('session_login')?.value;
 
   if (!loginCookie) {
-    // Not authenticated; return guest profile
+    
     return NextResponse.json({ success: true, user: { login: 'Гость', email: '', ...defaultProfile } });
   }
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  // For now, just echo back changes (persisting not implemented)
+
   const body = await request.json();
   return NextResponse.json({ success: true, user: body });
 }

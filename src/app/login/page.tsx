@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Қателерді ыңғайлы форматқа келтіру
+
   const fieldErrors = errors.reduce((acc, error) => {
     if (error.field) {
       acc[error.field] = error.message;
@@ -28,14 +28,14 @@ export default function LoginPage() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Очищаем ошибки при изменении поля
+
     setErrors(prev => prev.filter(error => error.field !== name));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Валидация на клиенте
+    
     const validationErrors = validateLoginForm(formData);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);

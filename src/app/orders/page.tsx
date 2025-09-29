@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 
-// UI ти��і
+
 type DealCard = {
   id: string;
   title: string;
@@ -41,7 +41,7 @@ export default function OrdersPage() {
   }, []);
 
   const stageBadgeColor = (stageId: string) => {
-    // Simple mapping, adjust as needed
+
     if (stageId.includes('WON')) return 'bg-green-500';
     if (stageId.includes('LOSE')) return 'bg-red-500';
     if (stageId.includes('PREPARATION')) return 'bg-yellow-500';
@@ -59,12 +59,12 @@ export default function OrdersPage() {
       if (!data.success) throw new Error(data.message || 'Repeat failed');
       const newDealId = data.newDealId as string;
 
-      // Option 1: redirect to payment or trigger stage change
+
       const payRes = await fetch(`/api/deals/${newDealId}/pay`, { method: 'POST' });
       const payData = await payRes.json();
       if (!payData.success) throw new Error(payData.message || 'Payment start failed');
 
-      // Reload list after repeat
+    
       await loadDeals();
       alert('Заказ повторен');
     } catch (e: unknown) {

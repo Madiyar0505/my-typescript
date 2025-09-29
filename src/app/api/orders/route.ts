@@ -4,9 +4,7 @@ import { getUserByLogin } from '@/lib/database';
 
 export const runtime = 'nodejs';
 
-// NOTE:
-// Аутентификация әзір толық емес болғандықтан, уақытша "testuser" арқылы
-// БД-дан bitrix_contact_id аламыз. Кейін нақты сессия/куки арқылы алмастыру керек.
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,11 +25,11 @@ export async function GET(request: NextRequest) {
         order: { DATE_CREATE: 'DESC' },
       });
     } else {
-      // Fallback: if no contact bound to user, return general latest deals
+      
       deals = await bitrixAPI.getDeals();
     }
 
-    // Normalize deals for UI
+   
     const normalized = deals.map((d) => ({
       id: String(d.ID),
       title: d.TITLE,
