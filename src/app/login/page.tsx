@@ -16,6 +16,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Қателерді ыңғайлы форматқа келтіру
+  const fieldErrors = errors.reduce((acc, error) => {
+    if (error.field) {
+      acc[error.field] = error.message;
+    }
+    return acc;
+  }, {} as Record<string, string>);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -87,9 +95,9 @@ export default function LoginPage() {
                   className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-gray-900"
                   placeholder="Введите логин"
                 />
-                {errors.filter(e => e.field === 'login').map((error, index) => (
-                  <p key={index} className="text-red-500 text-sm mt-1">{error.message}</p>
-                ))}
+                {fieldErrors.login && (
+                  <p className="text-red-500 text-sm mt-1">{fieldErrors.login}</p>
+                )}
               </div>
 
               <div>
@@ -114,22 +122,20 @@ export default function LoginPage() {
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
-                {errors.filter(e => e.field === 'password').map((error, index) => (
-                  <p key={index} className="text-red-500 text-sm mt-1">{error.message}</p>
-                ))}
               </div>
 
-              {errors.filter(e => e.field === 'general').map((error, index) => (
-                <p key={index} className="text-red-500 text-sm text-center">{error.message}</p>
-              ))}
+              {fieldErrors.general && (
+              <p className="text-red-500 text-sm text-center">{fieldErrors.general}</p>
+                )}
 
-              <button
-                type="submit"
-                disabled={!isFormValid || isLoading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? 'Вход...' : 'Войти'}
-              </button>
+                <button
+              type="submit"
+  disabled={!isFormValid || isLoading}
+  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+>
+  {isLoading ? 'Вход...' : 'Войти'}
+</button>
+
 
               <div className="text-center mt-2">
                 <p className="text-gray-600 text-base">или</p>
